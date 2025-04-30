@@ -1,14 +1,12 @@
-// This requires a Node.js server to implement
-// Example using Express.js
-
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 console.log('version: v0.0.1');
 
+// Handle root path
 app.get('/', async (req, res) => {
   try {
     // Fetch the playwright.dev website
@@ -28,10 +26,15 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Handle other routes to proxy all playwright.dev content
-app.get('*', async (req, res) => {
+// Simply use app.use for all other routes since it doesn't need path-to-regexp
+app.use(async (req, res) => {
   try {
-    const url = `https://playwright.dev${req.url}`;
+    // Get the path from the request URL
+    const path = req.url;
+    const url = `https://playwright.dev${path}`;
+
+    console.log(`Proxying request to: ${url}`);
+
     const response = await axios.get(url);
 
     // For non-HTML responses, just pass through
